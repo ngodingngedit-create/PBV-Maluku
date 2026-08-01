@@ -39,19 +39,19 @@ const props = defineProps({
     <div class="hero-gradient-overlay"></div>
 
     <div class="hero-container">
+      <!-- Title Row (Positions above banner image on desktop) -->
+      <div class="hero-top-row">
+        <h1 class="event-title">{{ eventTitle }}</h1>
+      </div>
+
       <div class="hero-grid">
-        <!-- 1. Top: Image Banner Card -->
+        <!-- 1. Left: Image Banner Card -->
         <div class="banner-card">
           <img :src="heroImage" :alt="eventTitle" class="banner-image" />
         </div>
 
-        <!-- 2. Below on Mobile / Right on Desktop: Title & Meta Info Stack (Matches Nyoman Fest Sample) -->
+        <!-- 2. Right: Meta Info Card Stack -->
         <div class="info-sidebar">
-          <!-- Title directly below banner image -->
-          <div class="hero-title-block">
-            <h1 class="event-title">{{ eventTitle }}</h1>
-          </div>
-
           <div class="meta-card">
             <!-- Item 1: Tim Bola Voli -->
             <div class="meta-item">
@@ -126,29 +126,40 @@ const props = defineProps({
   z-index: 3;
 }
 
+.hero-top-row {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
 .hero-grid {
   display: grid;
   grid-template-columns: 1fr 380px;
-  gap: 1.75rem;
+  gap: 1rem; /* Jarak antara hero image dan meta-card diperdekat */
   align-items: flex-start;
 }
 
 .banner-card {
   position: relative;
-  border-radius: 20px;
+  border-radius: 16px;
   overflow: hidden;
   box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4);
   width: 100%;
-  aspect-ratio: 16 / 7;
-  background-color: rgba(2, 6, 23, 0.8);
+  max-height: 250px;
+  background-color: rgba(2, 6, 23, 0.85);
   border: 1px solid rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .banner-image {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  max-height: 250px;
+  object-fit: contain;
   object-position: center;
   display: block;
 }
@@ -157,10 +168,6 @@ const props = defineProps({
   display: flex;
   flex-direction: column;
   gap: 1rem;
-}
-
-.hero-title-block {
-  margin-bottom: 0.25rem;
 }
 
 .event-title {
@@ -177,11 +184,12 @@ const props = defineProps({
   border: 1px solid rgba(255, 255, 255, 0.12);
   backdrop-filter: blur(12px);
   border-radius: 18px;
-  padding: 1.35rem 1.5rem;
+  padding: 1.75rem 1.5rem 2.5rem 1.5rem; /* Sisi bawah diperpanjang sedikit saja lagi */
   display: flex;
   flex-direction: column;
-  gap: 1.1rem;
+  gap: 1.55rem;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  height: 100%;
 }
 
 .meta-item {
