@@ -1,0 +1,49 @@
+/* Design Tokens & Variables for PBV Maluku (White Cards Main Content) */
+:root {
+  --bg-dark: #f8fafc; /* Background utama: off-white */
+  --bg-card: #ffffff; /* Card background: PUTIH BERSIH */
+  --bg-card-header: #f1f5f9; /* Header card: abu-abu sangat muda */
+  --bg-input: #ffffff; /* Input background putih */
+  --border-color: #e2e8f0;
+  --border-color-focus: #2563eb;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --accent-gold: #d97706;
+  --accent-orange: #f97316; /* Warna orange stepper aktif sesuai gambar */
+  --accent-blue: #2563eb;
+  --accent-red: #dc2626;
+  --shadow-main: 0 4px 20px -2px rgba(0, 0, 0, 0.06);
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --transition: all 0.25s ease;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  background-color: var(--bg-dark);
+  color: var(--text-primary);
+  font-family: var(--font-family);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-dark);
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
