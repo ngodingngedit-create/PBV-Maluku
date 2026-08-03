@@ -178,12 +178,47 @@ const prevStep = () => {
 }
 
 const handleFormSubmit = () => {
+  let photoUrl = null
+  if (formData.athletePhotoFile) {
+    try {
+      photoUrl = URL.createObjectURL(formData.athletePhotoFile)
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
+  const now = new Date()
+  const registrationDate = now.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })
+  const registrationTime = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
+
   emit('submit-success', {
     buyer: {
       fullName: formData.fullName,
       email: formData.email,
       phone: formData.athletePhone || formData.parentPhone,
       countryCode: '+62'
+    },
+    athlete: {
+      fullName: formData.fullName || 'MUHAMMAD ALFAREZ',
+      memberNo: 'PBVM-26-0001',
+      status: 'ATLET',
+      position: '-',
+      validThru: '2026 - 2028',
+      photoUrl: photoUrl,
+      jerseyName: formData.jerseyName,
+      shirtSize: formData.shirtSize,
+      pantsSize: formData.pantsSize,
+      dob: formData.dob,
+      birthPlace: formData.birthPlace,
+      gender: formData.gender,
+      height: formData.height,
+      weight: formData.weight,
+      address: formData.address,
+      athletePhone: formData.athletePhone,
+      parentPhone: formData.parentPhone,
+      education: formData.education,
+      className: formData.className,
+      achievements: formData.achievements,
     },
     holders: [
       {
@@ -192,6 +227,11 @@ const handleFormSubmit = () => {
         phone: formData.athletePhone || formData.parentPhone
       }
     ],
+    registration: {
+      date: registrationDate,
+      time: registrationTime,
+      invoiceNo: 'INV-' + now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + String(now.getDate()).padStart(2,'0') + '-' + String(Math.floor(Math.random()*9000)+1000),
+    },
     totalPayment: 150000
   })
 }

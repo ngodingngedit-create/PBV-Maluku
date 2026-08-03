@@ -2,7 +2,18 @@
 import { ref, watch, onMounted, onUnmounted } from 'vue'
 import logoImg from '../assets/images/M (1).png'
 
-const emit = defineEmits(['sidebar-toggle'])
+const props = defineProps({
+  activePage: {
+    type: String,
+    default: 'home'
+  },
+  forceWhite: {
+    type: Boolean,
+    default: false
+  }
+})
+
+const emit = defineEmits(['sidebar-toggle', 'navigate'])
 
 const isMobileMenuOpen = ref(false)
 const isScrolledPastHero = ref(false)
@@ -17,8 +28,23 @@ const handleScroll = () => {
     const heroBottom = heroEl.getBoundingClientRect().bottom
     isScrolledPastHero.value = heroBottom <= 70
   } else {
-    isScrolledPastHero.value = window.scrollY > 400
+    isScrolledPastHero.value = window.scrollY > 100
   }
+}
+
+const navigateTo = (page, selector = null) => {
+  emit('navigate', page)
+  if (selector) {
+    setTimeout(() => {
+      const el = document.querySelector(selector)
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' })
+      }
+    }, 150)
+  } else {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+  isMobileMenuOpen.value = false
 }
 
 onMounted(() => {
@@ -32,31 +58,32 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <header class="site-header" :class="{ 'scrolled-white': isScrolledPastHero }">
+  <!-- TOP HEADER -->
+  <header class="site-header" :class="{ 'scrolled-white': isScrolledPastHero || props.forceWhite }">
     <div class="header-container">
-      <!-- Logo Image Import -->
+      <!-- Logo -->
       <div class="brand-logo-container">
-        <a href="#hero" class="logo-link">
+        <a href="#" @click.prevent="navigateTo('home')" class="logo-link">
           <img :src="logoImg" alt="PBV MALUKU Logo" class="logo-image-only" />
         </a>
       </div>
 
       <!-- Desktop Navigation -->
       <nav class="desktop-nav">
-        <a href="#hero" class="nav-link active">Home</a>
-        <a href="#info" class="nav-link">Informasi</a>
-        <a href="#jadwal" class="nav-link">Jadwal Pertandingan</a>
-        <a href="#kontak" class="nav-link">Kontak</a>
+        <a href="#" @click.prevent="navigateTo('home')" class="nav-link" :class="{ active: activePage === 'home' }">Beranda</a>
+        <a href="#" @click.prevent="navigateTo('tickets', '#info')" class="nav-link" :class="{ active: activePage === 'tickets' }">Informasi</a>
+        <a href="#" @click.prevent="navigateTo('home', '.results-section')" class="nav-link">Jadwal Pertandingan</a>
+        <a href="#" @click.prevent="navigateTo('home', '.footer-section')" class="nav-link">Kontak</a>
       </nav>
 
-      <!-- Header Action Button (Warna Biru Tanpa Shadow Berlebih) -->
+      <!-- Right side: CTA (desktop) + Hamburger (mobile) -->
       <div class="header-action-group">
-        <button class="btn-header-primary">
+        <button class="btn-header-primary desktop-cta" @click="navigateTo('tickets', '#info')">
           Daftar Sekarang
         </button>
-        
+
         <!-- Mobile Hamburger Button -->
-        <button class="mobile-toggle" @click="isMobileMenuOpen = !isMobileMenuOpen" title="Toggle Navigation">
+        <button class="mobile-toggle" @click="isMobileMenuOpen = !isMobileMenuOpen" title="Menu">
           <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path v-if="!isMobileMenuOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
             <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -65,11 +92,12 @@ onUnmounted(() => {
       </div>
     </div>
 
-    <!-- Mobile Drawer Overlay & Sidebar -->
+    <!-- Mobile Drawer Overlay -->
     <transition name="fade">
       <div v-if="isMobileMenuOpen" class="mobile-drawer-overlay" @click="isMobileMenuOpen = false"></div>
     </transition>
 
+    <!-- Mobile Sidebar Drawer -->
     <transition name="slide-sidebar">
       <div v-if="isMobileMenuOpen" class="mobile-sidebar-drawer">
         <div class="sidebar-header">
@@ -82,32 +110,81 @@ onUnmounted(() => {
         </div>
 
         <div class="sidebar-menu-links">
-          <a href="#hero" class="mobile-link" @click="isMobileMenuOpen = false">Home</a>
-          <a href="#info" class="mobile-link" @click="isMobileMenuOpen = false">Informasi</a>
-          <a href="#jadwal" class="mobile-link" @click="isMobileMenuOpen = false">Jadwal Pertandingan</a>
-          <a href="#kontak" class="mobile-link" @click="isMobileMenuOpen = false">Kontak</a>
+          <a href="#" class="mobile-link" :class="{ active: activePage === 'home' }" @click.prevent="navigateTo('home')">Beranda</a>
+          <a href="#" class="mobile-link" :class="{ active: activePage === 'tickets' }" @click.prevent="navigateTo('tickets', '#info')">Informasi</a>
+          <a href="#" class="mobile-link" @click.prevent="navigateTo('home', '.results-section')">Jadwal Pertandingan</a>
+          <a href="#" class="mobile-link" @click.prevent="navigateTo('home', '.footer-section')">Kontak</a>
         </div>
 
         <div class="sidebar-footer">
-          <button class="btn-header-primary mobile-btn" @click="isMobileMenuOpen = false">Daftar Sekarang</button>
+          <button class="btn-header-primary mobile-btn" @click="navigateTo('tickets', '#info')">Daftar Sekarang</button>
         </div>
       </div>
     </transition>
   </header>
+
+  <!-- MOBILE BOTTOM TAB BAR -->
+  <nav class="mobile-bottom-nav">
+    <!-- Beranda -->
+    <button class="bottom-tab" :class="{ active: activePage === 'home' }" @click="navigateTo('home')">
+      <span class="tab-indicator"></span>
+      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+      </svg>
+      <span class="tab-label">Beranda</span>
+    </button>
+
+    <!-- Blog -->
+    <button class="bottom-tab" :class="{ active: activePage === 'blog-detail' }" @click="navigateTo('blog-detail')">
+      <span class="tab-indicator"></span>
+      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+        <polyline points="14 2 14 8 20 8"></polyline>
+        <line x1="16" y1="13" x2="8" y2="13"></line>
+        <line x1="16" y1="17" x2="8" y2="17"></line>
+        <polyline points="10 9 9 9 8 9"></polyline>
+      </svg>
+      <span class="tab-label">Blog</span>
+    </button>
+
+    <!-- Jadwal -->
+    <button class="bottom-tab" @click="navigateTo('home', '.results-section')">
+      <span class="tab-indicator"></span>
+      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <polyline points="12 6 12 12 16 14"></polyline>
+      </svg>
+      <span class="tab-label">Jadwal</span>
+    </button>
+
+    <!-- Daftar (CTA) -->
+    <button class="bottom-tab bottom-tab-cta" @click="navigateTo('tickets')">
+      <span class="tab-indicator tab-indicator-red"></span>
+      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+        <circle cx="9" cy="7" r="4"></circle>
+        <line x1="19" y1="8" x2="19" y2="14"></line>
+        <line x1="22" y1="11" x2="16" y2="11"></line>
+      </svg>
+      <span class="tab-label">Daftar</span>
+    </button>
+  </nav>
 </template>
 
 <style scoped>
+/* ─── TOP HEADER ──────────────────────────────────────────── */
 .site-header {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   z-index: 1000;
-  background-color: rgba(15, 23, 42, 0.94);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  background-color: rgba(15, 44, 89, 0.45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: none;
   transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -117,18 +194,12 @@ onUnmounted(() => {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
 }
 
-.site-header.scrolled-white .nav-link {
-  color: #475569;
-}
-
+.site-header.scrolled-white .nav-link { color: #475569; }
 .site-header.scrolled-white .nav-link:hover,
-.site-header.scrolled-white .nav-link.active {
-  color: #0f172a;
-}
-
-.site-header.scrolled-white .mobile-toggle {
-  color: #0f172a;
-}
+.site-header.scrolled-white .nav-link.active { color: #0f172a; }
+.site-header.scrolled-white .nav-link.active { color: #0f172a !important; }
+.site-header.scrolled-white .nav-link::after { background-color: #2563eb; }
+.site-header.scrolled-white .mobile-toggle { color: #0f172a; }
 
 .header-container {
   max-width: 1540px;
@@ -139,10 +210,7 @@ onUnmounted(() => {
   align-items: center;
 }
 
-.brand-logo-container {
-  display: flex;
-  align-items: center;
-}
+.brand-logo-container { display: flex; align-items: center; }
 
 .logo-link {
   display: flex;
@@ -158,23 +226,34 @@ onUnmounted(() => {
   display: block;
 }
 
-.desktop-nav {
-  display: flex;
-  gap: 2.2rem;
-}
+.desktop-nav { display: flex; gap: 2.2rem; }
 
 .nav-link {
   color: #cbd5e1;
   text-decoration: none;
   font-size: 0.92rem;
   font-weight: 600;
+  position: relative;
+  padding-bottom: 0.35rem;
   transition: color 0.2s ease;
 }
 
-.nav-link:hover,
-.nav-link.active {
-  color: #ffffff;
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: #ffffff;
+  transition: width 0.2s ease;
 }
+
+.nav-link:hover::after,
+.nav-link.active::after { width: 100%; }
+
+.nav-link:hover { color: #ffffff; }
+.nav-link.active { color: #ffffff; }
 
 .header-action-group {
   display: flex;
@@ -191,7 +270,6 @@ onUnmounted(() => {
   font-size: 0.88rem;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: none;
   transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
@@ -206,20 +284,21 @@ onUnmounted(() => {
   border: none;
   color: #ffffff;
   cursor: pointer;
-  padding: 0.25rem;
+  padding: 0.2rem;
+  line-height: 0;
 }
 
 .mobile-toggle svg {
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
 }
 
-/* MOBILE SIDEBAR DRAWER STYLING */
+/* ─── MOBILE SIDEBAR DRAWER ───────────────────────────────── */
 .mobile-drawer-overlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(15, 23, 42, 0.6);
-  backdrop-filter: blur(4px);
+  background-color: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(3px);
   z-index: 1050;
 }
 
@@ -227,13 +306,13 @@ onUnmounted(() => {
   position: fixed;
   top: 0;
   right: 0;
-  width: 280px;
+  width: 270px;
   height: 100vh;
   background-color: #ffffff;
   z-index: 1100;
   display: flex;
   flex-direction: column;
-  box-shadow: -10px 0 30px rgba(0, 0, 0, 0.15);
+  box-shadow: -8px 0 28px rgba(0, 0, 0, 0.12);
   padding: 1.25rem 1.5rem;
 }
 
@@ -246,7 +325,7 @@ onUnmounted(() => {
 }
 
 .sidebar-logo {
-  height: 38px;
+  height: 36px;
   object-fit: contain;
 }
 
@@ -255,16 +334,12 @@ onUnmounted(() => {
   border: none;
   color: #64748b;
   cursor: pointer;
-  padding: 0.25rem;
+  padding: 0.2rem;
   display: flex;
   align-items: center;
-  justify-content: center;
 }
 
-.btn-close-sidebar svg {
-  width: 24px;
-  height: 24px;
-}
+.btn-close-sidebar svg { width: 22px; height: 22px; }
 
 .sidebar-menu-links {
   display: flex;
@@ -277,14 +352,13 @@ onUnmounted(() => {
 .mobile-link {
   color: #1e293b;
   text-decoration: none;
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 600;
   transition: color 0.2s ease;
 }
 
-.mobile-link:hover {
-  color: #2563eb;
-}
+.mobile-link:hover,
+.mobile-link.active { color: #2563eb; }
 
 .sidebar-footer {
   padding-top: 1rem;
@@ -297,40 +371,95 @@ onUnmounted(() => {
   padding: 0.75rem 1rem;
 }
 
-/* Animations */
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
+/* ─── MOBILE BOTTOM TAB BAR ───────────────────────────────── */
+.mobile-bottom-nav { display: none; }
+
+/* ─── ANIMATIONS ──────────────────────────────────────────── */
+.fade-enter-active, .fade-leave-active { transition: opacity 0.3s ease; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
 
 .slide-sidebar-enter-active,
-.slide-sidebar-leave-active {
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
+.slide-sidebar-leave-active { transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
 .slide-sidebar-enter-from,
-.slide-sidebar-leave-to {
-  transform: translateX(100%);
-}
+.slide-sidebar-leave-to { transform: translateX(100%); }
 
+/* ─── RESPONSIVE ──────────────────────────────────────────── */
 @media (max-width: 860px) {
-  .desktop-nav {
-    display: none;
-  }
-  .btn-header-primary:not(.mobile-btn) {
-    display: none;
-  }
-  .mobile-toggle {
-    display: block;
-  }
+  /* Desktop nav hidden, show hamburger */
+  .desktop-nav { display: none; }
+  .desktop-cta { display: none; }
+  .mobile-toggle { display: block; }
+
   .header-container {
-    padding: 0.75rem 1rem;
+    padding: 0.65rem 1rem;
+    justify-content: space-between;
   }
-  .logo-image-only {
-    height: 40px;
+  .logo-image-only { height: 38px; }
+
+  /* Show bottom tab bar */
+  .mobile-bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1001;
+    background-color: #ffffff;
+    border-top: 1px solid #e2e8f0;
+    box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.07);
+    border-radius: 16px 16px 0 0;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
+
+  .bottom-tab {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 0 0.2rem 0.65rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    position: relative;
+    gap: 0.22rem;
+    color: #94a3b8;
+    transition: color 0.18s ease;
+    -webkit-tap-highlight-color: transparent;
+    outline: none;
+  }
+
+  /* Active indicator line at top of tab */
+  .tab-indicator {
+    width: 36px;
+    height: 2.5px;
+    border-radius: 0 0 3px 3px;
+    background-color: #2563eb;
+    margin-bottom: 0.38rem;
+    transform: scaleX(0);
+    transform-origin: center;
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    flex-shrink: 0;
+  }
+
+  .tab-indicator-red { background-color: #e10600; }
+
+  .bottom-tab.active .tab-indicator { transform: scaleX(1); }
+
+  .tab-icon {
+    width: 21px;
+    height: 21px;
+    flex-shrink: 0;
+  }
+
+  .tab-label {
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.15px;
+    line-height: 1;
+  }
+
+  .bottom-tab.active { color: #2563eb; }
+  .bottom-tab-cta:active { color: #e10600; }
 }
 </style>

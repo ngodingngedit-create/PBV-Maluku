@@ -97,8 +97,6 @@ const props = defineProps({
   position: relative;
   padding: 2rem 2rem;
   overflow: hidden;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  background-color: #0f172a;
 }
 
 /* Background Image Blur Effect */
