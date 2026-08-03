@@ -17,9 +17,18 @@ const emit = defineEmits(['sidebar-toggle', 'navigate'])
 
 const isMobileMenuOpen = ref(false)
 const isScrolledPastHero = ref(false)
+const localActiveTab = ref(props.activePage)
 
 watch(isMobileMenuOpen, (newVal) => {
   emit('sidebar-toggle', newVal)
+})
+
+watch(() => props.activePage, (newVal) => {
+  if (newVal === 'blog-detail') {
+    localActiveTab.value = 'blog'
+  } else {
+    localActiveTab.value = newVal
+  }
 })
 
 const handleScroll = () => {
@@ -30,10 +39,38 @@ const handleScroll = () => {
   } else {
     isScrolledPastHero.value = window.scrollY > 100
   }
+
+  // Active section tracking on scroll when on home page
+  if (props.activePage === 'home') {
+    const resultsEl = document.querySelector('.results-section')
+    const blogEl = document.querySelector('.blog-section')
+    const scrollPos = window.scrollY + window.innerHeight / 3
+
+    if (blogEl && scrollPos >= blogEl.offsetTop) {
+      localActiveTab.value = 'blog'
+    } else if (resultsEl && scrollPos >= resultsEl.offsetTop) {
+      localActiveTab.value = 'pertandingan'
+    } else {
+      localActiveTab.value = 'home'
+    }
+  }
 }
 
 const navigateTo = (page, selector = null) => {
   emit('navigate', page)
+  
+  if (page === 'tickets') {
+    localActiveTab.value = 'tickets'
+  } else if (page === 'blog-detail') {
+    localActiveTab.value = 'blog'
+  } else if (selector === '.blog-section') {
+    localActiveTab.value = 'blog'
+  } else if (selector === '.results-section') {
+    localActiveTab.value = 'pertandingan'
+  } else if (page === 'home' && !selector) {
+    localActiveTab.value = 'home'
+  }
+
   if (selector) {
     setTimeout(() => {
       const el = document.querySelector(selector)
@@ -123,10 +160,10 @@ onUnmounted(() => {
     </transition>
   </header>
 
-  <!-- MOBILE BOTTOM TAB BAR -->
-  <nav class="mobile-bottom-nav">
+  <!-- MOBILE BOTTOM TAB BAR — hidden when sidebar is open -->
+  <nav class="mobile-bottom-nav" :class="{ 'bottom-nav-hidden': isMobileMenuOpen }">
     <!-- Beranda -->
-    <button class="bottom-tab" :class="{ active: activePage === 'home' }" @click="navigateTo('home')">
+    <button class="bottom-tab" :class="{ active: localActiveTab === 'home' }" @click="navigateTo('home')">
       <span class="tab-indicator"></span>
       <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
@@ -135,8 +172,8 @@ onUnmounted(() => {
       <span class="tab-label">Beranda</span>
     </button>
 
-    <!-- Blog -->
-    <button class="bottom-tab" :class="{ active: activePage === 'blog-detail' }" @click="navigateTo('blog-detail')">
+    <!-- Blog — scroll to blog section on homepage -->
+    <button class="bottom-tab" :class="{ active: localActiveTab === 'blog' }" @click="navigateTo('home', '.blog-section')">
       <span class="tab-indicator"></span>
       <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -148,19 +185,23 @@ onUnmounted(() => {
       <span class="tab-label">Blog</span>
     </button>
 
-    <!-- Jadwal -->
-    <button class="bottom-tab" @click="navigateTo('home', '.results-section')">
+    <!-- Pertandingan -->
+    <button class="bottom-tab" :class="{ active: localActiveTab === 'pertandingan' }" @click="navigateTo('home', '.results-section')">
       <span class="tab-indicator"></span>
       <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="10"></circle>
-        <polyline points="12 6 12 12 16 14"></polyline>
+        <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
+        <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
+        <path d="M4 22h16"></path>
+        <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path>
+        <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path>
+        <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path>
       </svg>
-      <span class="tab-label">Jadwal</span>
+      <span class="tab-label">Pertandingan</span>
     </button>
 
-    <!-- Daftar (CTA) -->
-    <button class="bottom-tab bottom-tab-cta" @click="navigateTo('tickets')">
-      <span class="tab-indicator tab-indicator-red"></span>
+    <!-- Daftar -->
+    <button class="bottom-tab" :class="{ active: localActiveTab === 'tickets' }" @click="navigateTo('tickets')">
+      <span class="tab-indicator"></span>
       <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
         <circle cx="9" cy="7" r="4"></circle>
@@ -409,6 +450,16 @@ onUnmounted(() => {
     box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.07);
     border-radius: 16px 16px 0 0;
     padding-bottom: env(safe-area-inset-bottom, 0px);
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  /* Hidden state when sidebar is open */
+  .mobile-bottom-nav.bottom-nav-hidden {
+    transform: translateY(100%);
+    opacity: 0;
+    pointer-events: none;
   }
 
   .bottom-tab {
@@ -424,7 +475,7 @@ onUnmounted(() => {
     position: relative;
     gap: 0.22rem;
     color: #94a3b8;
-    transition: color 0.18s ease;
+    transition: color 0.25s ease;
     -webkit-tap-highlight-color: transparent;
     outline: none;
   }
@@ -438,11 +489,9 @@ onUnmounted(() => {
     margin-bottom: 0.38rem;
     transform: scaleX(0);
     transform-origin: center;
-    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     flex-shrink: 0;
   }
-
-  .tab-indicator-red { background-color: #e10600; }
 
   .bottom-tab.active .tab-indicator { transform: scaleX(1); }
 
@@ -450,6 +499,7 @@ onUnmounted(() => {
     width: 21px;
     height: 21px;
     flex-shrink: 0;
+    transition: color 0.25s ease;
   }
 
   .tab-label {
@@ -457,9 +507,9 @@ onUnmounted(() => {
     font-weight: 600;
     letter-spacing: 0.15px;
     line-height: 1;
+    transition: color 0.25s ease;
   }
 
   .bottom-tab.active { color: #2563eb; }
-  .bottom-tab-cta:active { color: #e10600; }
 }
 </style>

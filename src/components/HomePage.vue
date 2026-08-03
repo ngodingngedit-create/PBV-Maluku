@@ -322,7 +322,7 @@ const handleOpenMaps = () => {
 
         <div class="venues-grid">
           <!-- Venue 1: GOR Bulungan -->
-          <div class="venue-card" :style="{ backgroundImage: `url(${venueBulunganImg})` }">
+          <div class="venue-card" :style="{ backgroundImage: `url(${venueBulunganImg})` }" @click="window.open('https://www.google.com/maps/search/GOR+Bulungan+Jakarta', '_blank')" style="cursor: pointer;">
             <div class="venue-overlay">
               <span class="venue-badge">Lapangan Kandang</span>
               <h3 class="venue-title">GOR Bulungan</h3>
@@ -331,7 +331,7 @@ const handleOpenMaps = () => {
           </div>
 
           <!-- Venue 2: GOR Cilandak Barat -->
-          <div class="venue-card" :style="{ backgroundImage: `url(${venueCilandakImg})` }">
+          <div class="venue-card" :style="{ backgroundImage: `url(${venueCilandakImg})` }" @click="window.open('https://www.google.com/maps/search/GOR+Cilandak+Barat+Jakarta', '_blank')" style="cursor: pointer;">
             <div class="venue-overlay">
               <span class="venue-badge">Lapangan Latihan</span>
               <h3 class="venue-title">GOR Cilandak Barat</h3>
