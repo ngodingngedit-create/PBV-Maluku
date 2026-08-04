@@ -120,7 +120,12 @@ onUnmounted(() => {
         </button>
 
         <!-- Mobile Hamburger Button -->
-        <button class="mobile-toggle" @click="isMobileMenuOpen = !isMobileMenuOpen" title="Menu">
+        <button
+          v-if="activePage !== 'tickets'"
+          class="mobile-toggle"
+          @click="isMobileMenuOpen = !isMobileMenuOpen"
+          title="Menu"
+        >
           <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path v-if="!isMobileMenuOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
             <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -160,8 +165,8 @@ onUnmounted(() => {
     </transition>
   </header>
 
-  <!-- MOBILE BOTTOM TAB BAR — hidden when sidebar is open -->
-  <nav class="mobile-bottom-nav" :class="{ 'bottom-nav-hidden': isMobileMenuOpen }">
+  <!-- MOBILE BOTTOM TAB BAR — hidden when sidebar is open or when on tickets (form) page -->
+  <nav v-if="activePage !== 'tickets'" class="mobile-bottom-nav" :class="{ 'bottom-nav-hidden': isMobileMenuOpen }">
     <!-- Beranda -->
     <button class="bottom-tab" :class="{ active: localActiveTab === 'home' }" @click="navigateTo('home')">
       <span class="tab-indicator"></span>

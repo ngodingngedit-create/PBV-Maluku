@@ -1107,6 +1107,7 @@ body.sidebar-open .sticky-bottom-bar {
     white-space: normal;
     word-break: break-word;
     display: -webkit-box;
+    line-clamp: 2;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
@@ -1116,6 +1117,7 @@ body.sidebar-open .sticky-bottom-bar {
     white-space: normal;
     word-break: break-word;
     display: -webkit-box;
+    line-clamp: 2;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
